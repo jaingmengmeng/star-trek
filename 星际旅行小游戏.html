@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html>
+
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>星际旅行小游戏</title>
+    <style>
+        #stars {
+            top: 0px;
+            left: 0px;
+            position: absolute;
+            z-index: -1;
+        }
+
+        .map {
+            top: 0px;
+            left: 0px;
+            position: absolute;
+            z-index: 1;
+        }
+
+        .score {
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+    <canvas id='stars'></canvas>
+    <div class="map">
+        <span class="score">Score:0</span>
+    </div>
+    <script>
+        var context;
+        var arr = new Array();
+        var starCount = 200;
+        //背景星星上限
+        var rains = new Array();
+        var rainCount = 20;
+        function init() {
+            var stars = document.getElementById("stars");
+            document.getElementById("stars").style.background = "black";
+            stars.width = window.innerWidth;
+            stars.height = window.innerHeight;
+            context = stars.getContext("2d");
+        }
+        //背景流星上限
+        var Star = function () {
+            this.x = window.innerWidth * Math.random();
+            this.y = window.innerHeight * Math.random();
+            this.text = ".";
+            //代替星星
+            this.color = "white";
+            this.getColor = function () {
+                var _r = Math.random();
+                if (_r < 0.5) {
+                    this.color = "#333";
+                } else {
+                    this.color = "white";
+                }
+            }
+            //明暗颜色达到闪烁效果
+            this.init = function () {
+                this.getColor();
+            }
+            this.draw = function () {
+                context.fillStyle = this.color;
+                context.fillText(this.text, this.x, this.y);
+            }
+        }
+        //创建一个星星对象
+        function playStars() {
+            for (var n = 0; n < starCount; n++) {
+                arr[n].getColor();
+                arr[n].draw();
+            }
+        }
+        //星星重绘
+        var MeteorRain = function () {
+            this.x = -1;
+            this.y = -1;
+            //流星位置
+            this.length = -1;
+            this.angle = 30;
+            this.width = -1;
+            this.height = -1;
+            //流星所占区域
+            this.speed = 1;
+            this.offset_x = -1;
+            this.offset_y = -1;
+            //速度及位置偏移量
+            this.alpha = 1;
+            this.color1 = "";
+            this.color2 = "black";
+            //渐变色
+            this.init = function () {
+                this.getPos();
+                this.getRandomColor();
+                this.length = Math.ceil(Math.random() * 80 + 150);
+                this.speed = Math.ceil(Math.random() + 0.5);
+                var cos = Math.cos(this.angle * 3.14 / 180);
+                var sin = Math.sin(this.angle * 3.14 / 180);
+                this.width = this.length * cos;
+                this.height = this.length * sin;
+                this.offset_x = this.speed * cos;
+                this.offset_y = this.speed * sin;
+                //获取随机位置
+            }
+            this.getRandomColor = function () {
+                var a = Math.ceil(255 - 240 * Math.random());
+                this.color1 = "rgba(" + a + "," + a + "," + a + ",1)";
+                //黑灰色系实现尾部消失
+            }
+            this.countPos = function () {
+                this.x = this.x - this.offset_x;
+                this.y = this.y + this.offset_y;
+            }
+            //改变流星位置
+            this.getPos = function () {
+                this.x = Math.random() * window.innerWidth;
+                this.y = Math.random() * window.innerHeight;
+            }
+            //随机流星位置
+            this.draw = function () {
+                context.save();
+                context.beginPath();
+                context.lineWidth = 1;
+                context.globalAlpha = this.alpha;
+                var line = context.createLinearGradient(this.x, this.y,
+                    this.x + this.width, this.y - this.height);
+                //分段渐变设置颜色
+                line.addColorStop(0, "white");
+                line.addColorStop(0.3, this.color1);
+                line.addColorStop(0.6, this.color2);
+                context.strokeStyle = line;
+                context.moveTo(this.x, this.y);
+                context.lineTo(this.x + this.width, this.y - this.height);
+                context.closePath();
+                context.stroke();
+                //流星绘制
+                context.restore();
+            }
+            this.move = function () {
+                var x = this.x + this.width - this.offset_x;
+                var y = this.y - this.height;
+                context.clearRect(x - 3, y - 3, this.offset_x + 5, this.offset_y + 5);
+                //清空流星位置
+                this.countPos();
+                //重新计算位置，往左下移动
+                this.alpha -= 0.002;
+                this.draw();
+            }
+            //实现流星位置的移动
+        }
+        //绘制流星并添加效果选项
+        function playRains() {
+            for (var n = 0; n < rainCount; n++) {
+                var rain = rains[n];
+                rain.move();
+                if (rain.y > window.innerHeight) {
+                    context.clearRect(rain.x, rain.y - rain.height, rain.width, rain.height);
+                    rains[n] = new MeteorRain();
+                    rains[n].init();
+                }
+                //超范围清空
+            }
+        }
+        //流星雨变化
+
+        var Map = document.getElementsByClassName("map")[0];
+        Map.width = window.innerWidth;
+        Map.height = window.innerHeight;
+        var scoretxt = document.getElementsByClassName("score")[0];
+        var Score = 0;
+        function user() {
+            this.width = 60;
+            this.height = 70;
+            this.src = "./image/myplane.png";
+            this.x = window.innerWidth/2-this.width;
+            this.y = window.innerHeight/2+this.height;
+            this._user = null;
+            this.createuser = function () {
+                if (this._user == null) {
+                    this._user = document.createElement("img");
+                    this._user.style.width = this.width + "px";
+                    this._user.style.height = this.height + "px";
+                    this._user.style.zIndex = 1;
+                    this._user.style.position = "absolute";
+                    Map.appendChild(this._user);
+                }
+                this._user.style.left = this.x + "px";
+                this._user.style.top = this.y + "px";
+                this._user.src = this.src;
+            }
+            this.usermove = function (change_x,change_y) {
+                this.x = this.x + change_x
+                this.y = this.y + change_y
+                if(this.x <= 10){this.x = 10;}
+                if(this.x >= window.innerWidth-60){this.x = window.innerWidth-60;}
+                if(this.y <= 10){this.y = 10;}
+                if(this.y >= (window.innerHeight-70)){this.y = (window.innerHeight-70);}
+                this.createuser();
+            }
+        }
+        function shouter() {
+            this.width = 10;
+            this.height = 20;
+            this.src = "./image/bullet.png";
+            this._shouter = null;
+            this.x;
+            this.y;
+            this.creategun = function (user) {
+                if (this._shouter == null) {
+                    this._shouter = document.createElement("img");
+                    this._shouter.style.width = this.width;
+                    this._shouter.style.height = this.height;
+                    this._shouter.src = this.src;
+                    this._shouter.style.zIndex = 1;
+                    this._shouter.style.position = "absolute";
+                    this.x = parseInt(user._user.style.left) + user.width / 2 - this.width / 2;
+                    this.y = parseInt(user._user.style.top) - this.height;
+                    Map.appendChild(this._shouter);
+                }
+                this._shouter.style.left = this.x + "px";
+                this._shouter.style.top = this.y + "px";
+            }
+            this.gunmove = function (index, arry) {
+                this.y -= 2;
+                if (this.y <= 0) {
+                    this._shouter.remove();
+                    arry.splice(index, 1);
+                }
+                this.creategun();
+            }
+            this.shouterEnemy = function (enemy, index, arry) {
+                for (var key in enemy) {
+                    if (this.y >= enemy[key].y && this.y <= enemy[key].y + enemy[key].height && this.x > enemy[key].x - this.width && this.x < enemy[key].x + enemy[key].width) {
+                        enemy[key].blood--;
+                        if (enemy[key].blood <= 0) {
+                            Score += enemy[key].score;
+                            scoretxt.innerHTML = "Score:" + Score;
+                            enemy[key]._enemy.remove();
+                            enemy.splice(key, 1);
+                        }
+                        this._shouter.remove();
+                        arry.splice(index, 1);
+                    }
+                }
+            }
+        }
+        function enemy(w, h, b, s, f) {
+            this.width = w || 40;
+            this.height = h || 30;
+            this.blood = b || 1;
+            this.score = f || 100;
+            this.src = s || "./image/enemy.png";
+            this._enemy = null;
+            this.x;
+            this.y;
+            this.createenemy = function () {
+                if (this._enemy == null) {
+                    this._enemy = document.createElement("img");
+                    this._enemy.style.width = this.width + "px";
+                    this._enemy.style.height = this.height + "px";
+                    this._enemy.src = this.src;
+                    this._enemy.style.zIndex = 2;
+                    this._enemy.style.position = "absolute";
+                    this.x = Math.random() * (window.innerWidth - this.width);
+                    this.y = -this.height;
+                    Map.appendChild(this._enemy);
+                }
+                this._enemy.style.left = this.x + "px";
+                this._enemy.style.top = this.y + "px";
+            }
+            this.enemymove = function (index, arry) {
+                this.y++;
+                if (this.y >= window.innerHeight-this.height-10) {
+                    this._enemy.remove();
+                    arry.splice(index, 1);
+                }
+                this.createenemy();
+                //飞机撞击敌机，game over
+                if (User.x > this.x - User.width + 10 && User.x < this.x + this.width - 10 && User.y > this.y - this.height + 20 && User.y < this.y + this.height - 20) {
+                    User.src = "./image/myplane.png";
+                    User.createuser();
+                    alert("Game Over!");
+                    clearInterval(time_createenemy);
+                    clearInterval(time_createshouter);
+                    clearInterval(time_enemymove);
+                    clearInterval(time_shoutermove);
+                    Map.onmousemove = null;
+                    window.location.href = 'index.html';
+                    return;
+                }
+            }
+        }
+        var User;
+        var Shouter;
+        var Enemy;
+        var s_gun = [];
+        var s_enemy = [];
+        var time_createenemy;
+        var time_createshouter;
+        var time_enemymove;
+        var time_shoutermove;
+
+        window.onload = function () {
+            /*创建用户*/
+            User = new user();
+            User.createuser();
+            init();
+            for (var i = 0; i < starCount; i++) {
+                var star = new Star();
+                star.init();
+                star.draw();
+                arr.push(star);
+            }
+            //背景星星绘制
+            for (var i = 0; i < rainCount; i++) {
+                var rain = new MeteorRain();
+                rain.init();
+                rain.draw();
+                rains.push(rain);
+            }
+            //流星绘制
+            setInterval(playStars, 300);
+            setInterval(playRains, 20);
+            document.onkeydown = function (event) {
+                var e = event || window.event || arguments.callee.caller.arguments[0];
+                if (e && e.keyCode == 37) { User.usermove(-10,0);}
+                if (e && e.keyCode == 38) { User.usermove(0,-10); }
+                if (e && e.keyCode == 39) { User.usermove(10,0); }
+                if (e && e.keyCode == 40) { User.usermove(0,10); }
+            };    
+            // Map.onmousemove = function (e) {
+            //     var x = e.pageX - this.offsetLeft;
+            //     var y = e.pageY - this.offsetTop;
+            //     User.usermove(x,y);
+            // }
+            /*造子弹*/
+            time_createshouter = setInterval(function () {
+                Shouter = new shouter();
+                Shouter.creategun(User);
+                s_gun.push(Shouter);
+            }, 200)
+            /*子弹移动*/
+            time_shoutermove = setInterval(function () {
+                if (s_gun.length > 0) {
+                    for (var i = 0; i < s_gun.length; i++) {
+                        s_gun[i].gunmove(i, s_gun);
+                        s_gun[i].shouterEnemy(s_enemy, i, s_gun);
+                    }
+                }
+            }, 5)
+            /*造敌机*/
+            time_createenemy = setInterval(function () {
+                var rand = Math.random()
+                if (rand < 0.3) {
+                    Enemy = new enemy();
+                    Enemy.createenemy();
+                    s_enemy.push(Enemy);
+                }
+                else if (rand < 0.6) {
+                    Enemy = new enemy(60, 60, 2, "./image/alien1.png", 300);
+                    Enemy.createenemy();
+                    s_enemy.push(Enemy);
+                }
+                else if (rand < 0.8) {
+                    Enemy = new enemy(100, 100, 2, "./image/alien2.png", 300);
+                    Enemy.createenemy();
+                    s_enemy.push(Enemy);
+                }
+                else if(rand < 0.95){
+                    Enemy = new enemy(120, 120, 2, "./image/alien3.png", 300);
+                    Enemy.createenemy();
+                    s_enemy.push(Enemy);
+                }
+                else{
+                    Enemy = new enemy(120, 154, 2, "./image/sponge bob.png", 300);
+                    Enemy.createenemy();
+                    s_enemy.push(Enemy);
+                }
+            }, 500)
+            /*敌机移动*/
+            time_enemymove = setInterval(function () {
+                if (s_enemy.length > 0) {
+                    for (var key in s_enemy) {
+                        s_enemy[key].enemymove(key, s_enemy);
+                    }
+                }
+            }, 5)
+        }
+    </script>
+    
+</body>
+
+</html>

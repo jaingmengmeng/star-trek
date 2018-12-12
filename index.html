@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <script>
+  function show() {
+      document.getElementById("pop").style.display = "block";
+    }
+    //显示提示框
+    function newgame() {
+      document.getElementById("pop").style.display = "none";
+      window.location.href='星际旅行小游戏.html';
+    }
+    //开始新游戏
+    function out() {
+      document.getElementById("pop").style.display = "none";
+    }
+    //提示框关闭
+  </script>
+  <link rel="stylesheet" type="text/css" href="out css.css">
+</head>
+
+<body>
+  <div id="pop">
+    <div id="popMain">
+      <div id="popMiddle">
+        <p id="one"> Control the spaceship with direction arrows.Have a good time!</p>
+      </div>
+      <div id="popBottom">
+        <span id="span1" onClick="newgame()">New Game</span>
+        <span id="span2" onClick="out()">Leave</span>
+      </div>
+    </div>
+  </div>
+  <!--弹出框:帮助及游戏结束功能-->
+  <figure id="figure">
+    <div id="div1" onClick="newgame()">
+      <span class="face" onClick="newgame()">New Game</span>
+      <span class="face" onClick="newgame()">New Game</span>
+    </div>
+    <br>
+    <div id="div2" onClick="show()">
+      <span class="face" onClick="show()">Help</span>
+      <span class="face" onClick="show()">Help</span>
+    </div>
+    <br>
+    <div id="div3" onClick="javascript:self.close()">
+      <span class="face"><a href="javascript:self.close()">Leave</a></span>
+      <span class="face"><a href="javascript:self.close()">Leave</a></span>
+    </div>
+  </figure>
+  <!--设置初始界面元素-->
+  <canvas id="stars">
+    <p>Your browserdoes not support the canvas element.</p>
+  </canvas>
+  <canvas id="mid">
+    <p>Your browserdoes not support the canvas element.</p>
+  </canvas>
+  <canvas id="top" onmousemove="draw(event)">
+    <p>Your browserdoes not support the canvas element.</p>
+  </canvas>
+</body>
+</html>

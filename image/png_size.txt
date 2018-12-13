@@ -1,0 +1,8 @@
+alien1:60x60
+alien2:65x78
+alien3:87x140
+alien4:100x74
+alien5:72x100
+alien6:60x100
+alien7:75x100
+alien8:114x100

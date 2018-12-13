@@ -249,8 +249,8 @@
             }
         }
         function enemy(w, h, b, s, f) {
-            this.width = w || 40;
-            this.height = h || 30;
+            this.width = w || 80;
+            this.height = h || 60;
             this.blood = b || 1;
             this.score = f || 100;
             this.src = s || "./image/enemy.png";
@@ -355,28 +355,53 @@
             /*造敌机*/
             time_createenemy = setInterval(function () {
                 var rand = Math.random()
-                if (rand < 0.3) {
+                if (rand < 0.1) {
                     Enemy = new enemy();
                     Enemy.createenemy();
                     s_enemy.push(Enemy);
                 }
-                else if (rand < 0.6) {
+                else if (rand < 0.2) {
                     Enemy = new enemy(60, 60, 2, "./image/alien1.png", 300);
                     Enemy.createenemy();
                     s_enemy.push(Enemy);
                 }
-                else if (rand < 0.8) {
-                    Enemy = new enemy(100, 100, 2, "./image/alien2.png", 300);
+                else if (rand < 0.3) {
+                    Enemy = new enemy(65, 78, 2, "./image/alien2.png", 300);
                     Enemy.createenemy();
                     s_enemy.push(Enemy);
                 }
-                else if(rand < 0.95){
-                    Enemy = new enemy(120, 120, 2, "./image/alien3.png", 300);
+                else if(rand < 0.4){
+                    Enemy = new enemy(87, 120, 2, "./image/alien3.png", 300);
+                    Enemy.createenemy();
+                    s_enemy.push(Enemy);
+                }
+                else if (rand < 0.5) {
+                    Enemy = new enemy(100, 74, 2, "./image/alien4.png", 300);
+                    Enemy.createenemy();
+                    s_enemy.push(Enemy);
+                }
+                else if (rand < 0.6) {
+                    Enemy = new enemy(72, 100, 2, "./image/alien5.png", 300);
+                    Enemy.createenemy();
+                    s_enemy.push(Enemy);
+                }
+                else if (rand < 0.7) {
+                    Enemy = new enemy(60, 100, 2, "./image/alien6.png", 300);
+                    Enemy.createenemy();
+                    s_enemy.push(Enemy);
+                }
+                else if (rand < 0.8) {
+                    Enemy = new enemy(75, 100, 2, "./image/alien7.png", 300);
+                    Enemy.createenemy();
+                    s_enemy.push(Enemy);
+                }
+                else if (rand < 0.9) {
+                    Enemy = new enemy(114, 100, 2, "./image/alien8.png", 300);
                     Enemy.createenemy();
                     s_enemy.push(Enemy);
                 }
                 else{
-                    Enemy = new enemy(120, 154, 2, "./image/sponge bob.png", 300);
+                    Enemy = new enemy(100, 132, 2, "./image/sponge bob.png", 300);
                     Enemy.createenemy();
                     s_enemy.push(Enemy);
                 }
